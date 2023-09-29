@@ -53,3 +53,57 @@ class TestAccountModel(TestCase):
         account.create()
         self.assertEqual(len(Account.all()), 1)
 
+    def test_representing_an_account(self):
+        """Test the account's representing"""
+        account = Account()
+        account.name = "Aina"
+        self.assertEqual(str(account), "<Account 'Aina'>")
+
+    def test_data_to_dict(self):
+        """Test the data go to dict"""
+        data = ACCOUNT_DATA[self.rand] # get a random account
+        account = Account(**data)
+        result = account.to_dict()
+        self.assertEqual(account.name, result["name"])
+        self.assertEqual(account.email, result["email"])
+        self.assertEqual(account.phone_number, result["phone_number"])
+        self.assertEqual(account.disabled, result["disabled"])
+        self.assertEqual(account.date_joined, result["date_joined"])
+
+    def test_data_from_dict(self):
+        """Test the data from dict"""
+        data = ACCOUNT_DATA[self.rand] # get a random account
+        account = Account()
+        account.from_dict(data)
+        self.assertEqual(account.name, data["name"])
+        self.assertEqual(account.email, data["email"])
+        self.assertEqual(account.phone_number, data["phone_number"])
+        self.assertEqual(account.disabled, data["disabled"])
+
+    def test_updating_an_account(self):
+        """Test updating an account"""
+        data = ACCOUNT_DATA[self.rand] # get a random account
+        account = Account(**data)
+        account.create()
+        self.assertIsNotNone(account.id)
+        account.name = "Aina"
+        account.update()
+        found = Account.find(account.id)
+        self.assertEqual(found.name, "Aina")
+
+    def test_updating_with_no_id(self):
+        """Test updating an account with no id"""
+        data = ACCOUNT_DATA[self.rand] # get a random account
+        account = Account(**data)
+        account.id = None
+        self.assertRaises(DataValidationError, account.update)
+
+    def test_delete_an_account(self):
+        """Test deletion of an account"""
+        for i in [0, 1]:
+            data = ACCOUNT_DATA[self.rand] # get a random account
+            account = Account(**data)
+            account.create()
+        self.assertEqual(len(Account.all()), 2)
+        account.delete()
+        self.assertEqual(len(Account.all()), 1)
